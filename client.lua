@@ -3,15 +3,14 @@ local directions = {
     [180] = 'S', [225] = 'SW', [270] = 'W', [315] = 'NW', [360] = 'N',
 }
 
-local showstreetCompass = false -- Initialize the toggle state
+local showStreetCompass = false 
 
-RegisterCommand('togglestreetcompass', function()
-    showstreetCompass = not showstreetCompass -- Toggle the streetCompass state
+RegisterCommand('toggleStreetCompass', function()
+    showStreetCompass = not showStreetCompass -- State toggle
     
-    if not showstreetCompass then
-        -- Clear the UI when the streetCompass is turned off, using the updated action name
+    if not showStreetCompass then
         SendNUIMessage({
-            action = 'clearDisplay', -- Updated to match the JavaScript listener
+            action = 'clearDisplay', 
         })
     end
 end, false)
@@ -20,7 +19,7 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(500) -- Update interval
         
-        if showstreetCompass then
+        if showStreetCompass then
             local ped = PlayerPedId()
             local coords = GetEntityCoords(ped)
             local heading = math.floor(GetEntityHeading(ped) + 0.5)
@@ -28,10 +27,9 @@ Citizen.CreateThread(function()
             streetName = GetStreetNameFromHashKey(streetName)
             crossingRoad = crossingRoad and GetStreetNameFromHashKey(crossingRoad) or 'N/A'
 
-            local nearestDegree = heading - (heading % 45)
+            local nearestDegree = (math.floor((heading + 22.5) / 45) * 45) % 360
             local direction = directions[nearestDegree] or 'N'
 
-            -- Update the UI with the current location, using the action name consistent with JavaScript
             SendNUIMessage({
                 action = 'updateLocation',
                 direction = direction,
